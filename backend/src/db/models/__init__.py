@@ -380,3 +380,172 @@ class AuditLog(SQLModel, table=True):
     __table_args__ = (
         Index("ix_audit_tenant_action", "tenant_id", "action", "created_at"),
     )
+
+
+# ============================================================================
+# AI Data Analysis Models
+# ============================================================================
+
+class Dataset(SQLModel, table=True):
+    """Uploaded dataset for analysis."""
+    
+    __tablename__ = "datasets"
+    
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    tenant_id: UUID = Field(foreign_key="tenants.id", index=True)
+    user_id: UUID = Field(foreign_key="users.id", index=True)
+    
+    name: str = Field(max_length=255, index=True)
+    description: Optional[str] = None
+    file_type: str = Field(max_length=50)  # csv|excel|json
+    file_size: int  # bytes
+    storage_path: str = Field(max_length=512)  # S3/local path
+    
+    # Data metadata
+    row_count: Optional[int] = None
+    column_count: Optional[int] = None
+    columns: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    
+    # Processing status
+    status: str = Field(default="uploaded", max_length=50)  # uploaded|processing|ready|error
+    processing_error: Optional[str] = None
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    __table_args__ = (
+        Index("ix_datasets_tenant_status", "tenant_id", "status"),
+    )
+
+
+class Analysis(SQLModel, table=True):
+    """Statistical analysis performed on a dataset."""
+    
+    __tablename__ = "analyses"
+    
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    tenant_id: UUID = Field(foreign_key="tenants.id", index=True)
+    dataset_id: UUID = Field(foreign_key="datasets.id", index=True)
+    user_id: UUID = Field(foreign_key="users.id", index=True)
+    
+    analysis_type: str = Field(max_length=100)  # descriptive|correlation|regression|forecast|outlier
+    
+    # Analysis results
+    results: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    summary: Optional[str] = None  # AI-generated summary
+    
+    # Statistics
+    statistics: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    correlations: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    
+    # Visualizations
+    charts: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    
+    # Processing
+    status: str = Field(default="pending", max_length=50)  # pending|processing|completed|error
+    processing_time: Optional[float] = None  # seconds
+    error: Optional[str] = None
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    completed_at: Optional[datetime] = None
+    
+    __table_args__ = (
+        Index("ix_analyses_dataset_type", "dataset_id", "analysis_type"),
+    )
+
+
+class Prediction(SQLModel, table=True):
+    """Forecasting and prediction results."""
+    
+    __tablename__ = "predictions"
+    
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    tenant_id: UUID = Field(foreign_key="tenants.id", index=True)
+    dataset_id: UUID = Field(foreign_key="datasets.id", index=True)
+    analysis_id: UUID = Field(foreign_key="analyses.id", index=True)
+    
+    model_type: str = Field(max_length=100)  # prophet|arima|linear_regression|neural_prophet
+    target_variable: str = Field(max_length=255)
+    
+    # Prediction results
+    predictions: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    forecast_period: int  # number of periods predicted
+    
+    # Model performance
+    accuracy_metrics: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    confidence_intervals: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    
+    # AI insights
+    insights: Optional[str] = None
+    recommendations: Optional[str] = None
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    __table_args__ = (
+        Index("ix_predictions_dataset_model", "dataset_id", "model_type"),
+    )
+
+
+class InsightQuery(SQLModel, table=True):
+    """Natural language queries and AI responses."""
+    
+    __tablename__ = "insight_queries"
+    
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    tenant_id: UUID = Field(foreign_key="tenants.id", index=True)
+    dataset_id: UUID = Field(foreign_key="datasets.id", index=True)
+    user_id: UUID = Field(foreign_key="users.id", index=True)
+    
+    query: str  # Natural language question
+    query_type: str = Field(max_length=100)  # correlation|prediction|comparison|summary|custom
+    
+    # AI Response
+    response: str  # AI-generated answer
+    sql_executed: Optional[str] = None  # If SQL was generated
+    data_used: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    
+    # Charts generated
+    charts: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    
+    # Metadata
+    processing_time: Optional[float] = None
+    ai_model: str = Field(default="gpt-4o", max_length=50)
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    __table_args__ = (
+        Index("ix_queries_dataset_created", "dataset_id", "created_at"),
+    )
+
+
+class AnalysisReport(SQLModel, table=True):
+    """Generated analysis reports with insights and visualizations."""
+    
+    __tablename__ = "analysis_reports"
+    
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    tenant_id: UUID = Field(foreign_key="tenants.id", index=True)
+    dataset_id: UUID = Field(foreign_key="datasets.id", index=True)
+    user_id: UUID = Field(foreign_key="users.id", index=True)
+    
+    title: str = Field(max_length=255)
+    report_type: str = Field(max_length=100)  # full_analysis|executive_summary|custom
+    
+    # Report content
+    sections: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    insights: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    recommendations: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    
+    # Visualizations
+    charts: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    
+    # Export
+    pdf_path: Optional[str] = None
+    export_format: str = Field(default="pdf", max_length=50)  # pdf|html|markdown
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    __table_args__ = (
+        Index("ix_reports_dataset_created", "dataset_id", "created_at"),
+    )
+

@@ -1,8 +1,8 @@
 """
-API dependencies and utilities.
+API dependencies and utilities - DEMO MODE (Auth Bypassed)
 """
-from typing import Annotated
-from uuid import UUID
+from typing import Annotated, Optional
+from uuid import UUID, uuid4
 
 from fastapi import Depends, HTTPException, status, Header
 from sqlalchemy import select
@@ -17,55 +17,34 @@ logger = get_logger(__name__)
 
 
 async def get_current_user(
-    authorization: Annotated[str, Header()],
-    session: Annotated[AsyncSession, Depends(get_session)],
+    authorization: Annotated[str | None, Header()] = None,
+    session: AsyncSession = Depends(get_session),
 ) -> User:
     """
-    Get current authenticated user from JWT token.
+    Get current authenticated user - DEMO MODE: Returns mock user.
     
     Args:
-        authorization: Authorization header (Bearer token)
+        authorization: Authorization header (optional for demo)
         session: Database session
     
     Returns:
-        Authenticated user
-    
-    Raises:
-        HTTPException: If authentication fails
+        Mock demo user
     """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+    # DEMO MODE: Return a mock user without authentication
+    logger.info("DEMO MODE: Bypassing authentication, returning mock user")
+    
+    # Create a mock user for demo purposes
+    mock_user = User(
+        id=UUID("00000000-0000-0000-0000-000000000001"),
+        tenant_id=UUID("00000000-0000-0000-0000-000000000001"),
+        auth_provider_id="demo_user",
+        email="demo@aurix.com",
+        full_name="Demo User",
+        role="admin",
+        is_active=True,
     )
     
-    try:
-        # Extract token from "Bearer <token>"
-        if not authorization.startswith("Bearer "):
-            raise credentials_exception
-        
-        token = authorization.split(" ")[1]
-        
-        # Verify JWT
-        payload = verify_supabase_jwt(token)
-        auth_provider_id: str = payload.get("sub")
-        
-        if not auth_provider_id:
-            raise credentials_exception
-        
-    except Exception as e:
-        logger.error(f"Token verification failed: {e}")
-        raise credentials_exception
-    
-    # Get user from database
-    stmt = select(User).where(User.auth_provider_id == auth_provider_id)
-    result = await session.execute(stmt)
-    user = result.scalar_one_or_none()
-    
-    if not user or not user.is_active:
-        raise credentials_exception
-    
-    return user
+    return mock_user
 
 
 async def get_current_tenant(
@@ -73,35 +52,29 @@ async def get_current_tenant(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Tenant:
     """
-    Get tenant for current user.
+    Get tenant for current user - DEMO MODE: Returns mock tenant.
     
     Args:
         current_user: Authenticated user
         session: Database session
     
     Returns:
-        User's tenant
-    
-    Raises:
-        HTTPException: If tenant not found
+        Mock demo tenant
     """
-    stmt = select(Tenant).where(Tenant.id == current_user.tenant_id)
-    result = await session.execute(stmt)
-    tenant = result.scalar_one_or_none()
+    # DEMO MODE: Return a mock tenant
+    logger.info("DEMO MODE: Bypassing tenant lookup, returning mock tenant")
     
-    if not tenant:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tenant not found",
-        )
+    mock_tenant = Tenant(
+        id=UUID("00000000-0000-0000-0000-000000000001"),
+        name="Demo Company",
+        slug="demo-company",
+        status="active",
+        plan="professional",
+        max_ai_calls_per_month=10000,
+        ai_calls_this_month=0,
+    )
     
-    if tenant.status != "active":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Tenant is {tenant.status}",
-        )
-    
-    return tenant
+    return mock_tenant
 
 
 def require_role(required_role: str):
