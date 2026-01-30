@@ -2,7 +2,8 @@
 Database models for Aurix platform.
 All models include tenant_id for multi-tenancy support.
 """
-from datetime import datetime, date
+from datetime import datetime
+from datetime import date as Date
 from decimal import Decimal
 from typing import Optional, Any
 from uuid import UUID, uuid4
@@ -123,8 +124,8 @@ class OAuthToken(SQLModel, table=True):
     token_type: str = Field(default="Bearer", max_length=50)
     scope: Optional[str] = Field(default=None, max_length=1024)
     
-    # Additional metadata
-    metadata: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    # Additional metadata (renamed from metadata to avoid SQLAlchemy conflict)
+    token_metadata: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -170,7 +171,7 @@ class Transaction(SQLModel, table=True):
     tenant_id: UUID = Field(foreign_key="tenants.id", index=True)
     account_id: Optional[UUID] = Field(default=None, foreign_key="accounts.id", index=True)
     
-    date: date = Field(index=True)
+    date: Date = Field(index=True)
     amount: Decimal = Field(max_digits=14, decimal_places=2)
     
     # Categorization
@@ -209,12 +210,12 @@ class MetricDaily(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     tenant_id: UUID = Field(foreign_key="tenants.id", index=True)
     
-    date: date = Field(index=True)
+    date: Date = Field(index=True)
     metric: str = Field(max_length=100, index=True)  # revenue|expenses|net_cash|runway|etc
     value: Decimal = Field(max_digits=14, decimal_places=2)
     
-    # Additional context
-    metadata: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    # Additional context (renamed from metadata to avoid SQLAlchemy conflict)
+    metric_metadata: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
@@ -267,8 +268,8 @@ class Report(SQLModel, table=True):
     title: str = Field(max_length=255)
     report_type: str = Field(max_length=50)  # monthly|quarterly|annual|custom
     
-    period_start: date
-    period_end: date
+    period_start: Date
+    period_end: Date
     
     # Content
     html: str  # HTML version

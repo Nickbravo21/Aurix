@@ -10,17 +10,17 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..db.session import get_session
-from ..db.models import User, Tenant
-from .deps import get_current_user, get_current_tenant, check_ai_quota
-from ..etl.kpis import KPIEngine
-from ..etl.forecasts import ForecastEngine
-from ..ai.analyzers import (
+from src.db.session import get_session
+from src.db.models import User, Tenant
+from src.api.deps import get_current_user, get_current_tenant, check_ai_quota
+from src.etl.kpis import KPIEngine
+from src.etl.forecasts import ForecastEngine
+from src.ai.analyzers import (
     generate_financial_summary,
     generate_forecast_analysis,
     generate_expense_analysis,
 )
-from ..core.logging import get_logger
+from src.core.logging import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/analytics", tags=["analytics"])

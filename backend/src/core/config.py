@@ -68,31 +68,10 @@ class Settings(BaseSettings):
     openai_temperature: float = 0.2
     openai_max_tokens: int = 2000
     
-    # Integrations - Google
+    # Integrations - Google OAuth (REQUIRED)
     google_client_id: str
     google_client_secret: str
     google_redirect_uri: str = "http://localhost:8000/api/v1/datasources/oauth/google/callback"
-    
-    # Integrations - QuickBooks
-    quickbooks_client_id: str
-    quickbooks_client_secret: str
-    quickbooks_redirect_uri: str = "http://localhost:8000/api/v1/datasources/oauth/quickbooks/callback"
-    quickbooks_environment: Literal["sandbox", "production"] = "sandbox"
-    
-    # Integrations - Stripe
-    stripe_api_key: str
-    stripe_webhook_secret: str | None = None
-    stripe_price_starter: str | None = None
-    stripe_price_pro: str | None = None
-    stripe_price_enterprise: str | None = None
-    
-    # Integrations - Slack
-    slack_bot_token: str | None = None
-    slack_signing_secret: str | None = None
-    
-    # Integrations - SendGrid
-    sendgrid_api_key: str | None = None
-    sendgrid_from_email: str = "notifications@aurix.ai"
     
     # Storage
     storage_provider: Literal["supabase", "s3", "local"] = "supabase"
@@ -120,10 +99,7 @@ class Settings(BaseSettings):
     report_max_file_size_mb: int = 50
     
     # Feature Flags
-    enable_plaid: bool = False
-    enable_quickbooks: bool = True
     enable_google_sheets: bool = True
-    enable_stripe: bool = True
 
 
 @lru_cache()

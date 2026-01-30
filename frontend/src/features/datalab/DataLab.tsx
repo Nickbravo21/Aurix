@@ -139,13 +139,6 @@ export default function DataLab() {
             </p>
           </div>
         </div>
-
-        {/* Note about API Key */}
-        <div className="mt-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
-          <p className="text-yellow-400 text-sm">
-            <strong>Note:</strong> You'll need to add your OpenAI API key in settings to enable AI analysis features.
-          </p>
-        </div>
       </div>
     </div>
   )

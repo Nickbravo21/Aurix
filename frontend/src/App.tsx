@@ -9,6 +9,7 @@ import DataSources from './features/datasources/DataSources'
 import Alerts from './features/alerts/Alerts'
 import Settings from './features/settings/Settings'
 import DataLab from './features/datalab/DataLab'
+import AIChat from './features/chat/AIChat'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/datalab" element={<DataLab />} />
+        <Route path="/chat" element={<AIChat />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/datasources" element={<DataSources />} />
         <Route path="/alerts" element={<Alerts />} />

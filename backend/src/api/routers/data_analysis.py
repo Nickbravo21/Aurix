@@ -12,17 +12,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
 
-from ...db.session import get_session
-from ...db.models import User, Tenant, Dataset, Analysis, InsightQuery, AnalysisReport, Prediction
-from ...api.deps import get_current_user, get_current_tenant
-from ...services.data_agents import (
+from src.db.session import get_session
+from src.db.models import User, Tenant, Dataset, Analysis, InsightQuery, AnalysisReport, Prediction
+from src.api.deps import get_current_user, get_current_tenant
+from src.services.data_agents import (
     DataCleanerAgent,
     StatsAgent,
     InsightAgent,
     VizAgent,
     ForecastAgent
 )
-from ...core.logging import get_logger
+from src.core.logging import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/data", tags=["Data Analysis"])

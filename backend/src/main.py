@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from .core.config import settings
 from .core.logging import setup_logging, get_logger
 from .db.session import init_db, close_db
-from .api.routers import analytics, data_analysis
+from .api.routers import analytics, data_analysis, chat
 
 # Setup logging
 setup_logging()
@@ -93,6 +93,7 @@ async def root():
 # Include routers
 app.include_router(analytics.router, prefix=settings.api_v1_prefix)
 app.include_router(data_analysis.router, prefix=settings.api_v1_prefix)
+app.include_router(chat.router, prefix=settings.api_v1_prefix)
 
 
 if __name__ == "__main__":

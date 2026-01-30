@@ -9,7 +9,7 @@ from sqlalchemy import select
 from ..celery_app import celery_app
 from ...db.session import get_session_context
 from ...db.models import DataSource, OAuthToken, Transaction
-from ...integrations import GoogleSheetsClient, QuickBooksClient, StripeClient
+from ...integrations import GoogleSheetsClient
 from ...etl.normalize import enrich_transaction, detect_duplicates
 from ...core.security import token_encryption
 from ...core.logging import get_logger
@@ -61,19 +61,8 @@ async def ingest_datasource(datasource_id: str, days_back: int = 30) -> dict:
                 client = GoogleSheetsClient(access_token, refresh_token)
                 spreadsheet_id = datasource.config.get("spreadsheet_id")
                 raw_transactions = await client.extract_transactions(spreadsheet_id)
-                
-            elif datasource.kind == "quickbooks":
-                realm_id = datasource.config.get("realm_id")
-                client = QuickBooksClient(access_token, refresh_token, realm_id)
-                raw_transactions = await client.extract_transactions(start_date, end_date)
-                
-            elif datasource.kind == "stripe":
-                account_id = datasource.config.get("account_id")
-                client = StripeClient(account_id)
-                raw_transactions = await client.extract_transactions(start_date, end_date)
-                
             else:
-                raise ValueError(f"Unsupported datasource kind: {datasource.kind}")
+                raise ValueError(f"Unsupported datasource kind: {datasource.kind}. Only google_sheets is supported.")
             
             # Deduplicate
             unique_transactions = detect_duplicates(raw_transactions)
