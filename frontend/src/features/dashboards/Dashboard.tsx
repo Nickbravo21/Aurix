@@ -16,10 +16,10 @@ export default function Dashboard() {
     // Simulate API call with animation
     setTimeout(() => {
       setMetrics({
-        revenue: 245680,
-        expenses: 182340,
-        netCash: 63340,
-        runway: 256
+        revenue: 0,
+        expenses: 0,
+        netCash: 0,
+        runway: 0
       })
       setLoading(false)
     }, 800)
@@ -82,7 +82,7 @@ export default function Dashboard() {
         <MetricCard
           title="Total Expenses"
           value={`$${metrics.expenses.toLocaleString()}`}
-          change="+5.2%"
+          change="0%"
           trend="neutral"
           icon="📊"
           color="purple"
@@ -90,16 +90,16 @@ export default function Dashboard() {
         <MetricCard
           title="Net Cash Flow"
           value={`$${metrics.netCash.toLocaleString()}`}
-          change="+24.1%"
-          trend="up"
+          change="0%"
+          trend="neutral"
           icon="📈"
           color="green"
         />
         <MetricCard
           title="Cash Runway"
           value={`${metrics.runway} days`}
-          change="Healthy"
-          trend="up"
+          change="No Data"
+          trend="neutral"
           icon="⏱️"
           color="indigo"
         />
